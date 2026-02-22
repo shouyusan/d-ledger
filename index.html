@@ -319,6 +319,49 @@ header{
   height: 40px;
 }
 
+/* ===== Final fix: no overlap between menu and centered logo ===== */
+header.topbar{
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 9999 !important;
+  height: 76px !important;
+}
+
+/* メニューは左固定 */
+header.topbar > .menu-btn{
+  position: absolute !important;
+  left: 12px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 3 !important;
+}
+
+/* 中央エリアは「左右に安全余白」を作る */
+header.topbar .topbar-center{
+  position: absolute !important;
+  top: 50% !important;
+  left: 60px !important;   /* ←左の安全余白（メニュー分） */
+  right: 60px !important;  /* ←右も同じだけ確保（中央維持） */
+  transform: translateY(-50%) !important;
+  display: grid !important;
+  place-items: center !important;
+  z-index: 2 !important;
+  pointer-events: none !important;
+}
+
+/* ロゴは中央で縮む（安全余白内で収まる） */
+header.topbar .topbar-logo{
+  height: 48px !important;
+  width: auto !important;
+  max-width: 100% !important;  /* ←ここが重要：安全余白からはみ出さない */
+  display: block !important;
+}
+
+/* 念のため右ダミー非表示でもOK */
+header.topbar .topbar-right{
+  display: none !important;
+}
+
 
 </style>
 
@@ -328,14 +371,15 @@ header{
 <header class="topbar">
   <button class="menu-btn" onclick="toggleMenu()" aria-label="メニュー">☰</button>
 
-  <!-- 中央ロゴ（合体PNG） -->
+ 
   <div class="topbar-center">
     <img src="./logo.png" alt="D-Ledger" class="topbar-logo">
   </div>
 
-  <!-- 右側ダミー（中央寄せを安定させる） -->
+ 
   <div class="topbar-right" aria-hidden="true"></div>
 </header>
+
 
 <nav id="menu" class="side">
   <a href="#" onclick="loadPage('home')">計算</a>
