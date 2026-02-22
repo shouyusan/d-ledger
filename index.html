@@ -245,16 +245,46 @@ input:focus{
   color: var(--muted);
   line-height:1.8;
 }
+
+header{
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.menu-btn{
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: white;
+  cursor: pointer;
+}
+
+.header-center{
+  text-align: center;
+}
+
+.main-logo{
+  width: 320px;   /* 大きさ調整ここ */
+  max-width: 80%;
+}
+
 </style>
-</head>
+
 
 <body>
 
 <header>
   <button class="menu-btn" onclick="toggleMenu()">☰</button>
-  <div class="brand">
-    <img src="./logo.png" alt="D-Ledger">
-    <div>D-Ledger</div>
+
+  <div class="header-center">
+    <img src="./logolong_transparent.png" alt="D-Ledger" class="main-logo">
   </div>
 </header>
 
