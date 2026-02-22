@@ -20,62 +20,230 @@
 <title>D-Ledger</title>
 
 <style>
-body{
-  margin:0;
-  font-family:sans-serif;
-  background:#0f172a;
-  color:white;
+:root{
+  --bg:#0b1220;
+  --bg2:#0f172a;
+  --card:#0b1220;
+  --line:#334155;
+  --line2:#1f2937;
+  --text:#e5e7eb;
+  --muted:rgba(229,231,235,.72);
+
+  --c1:#00F5FF;   /* cyan */
+  --c2:#B6FF00;   /* lime */
+  --c3:#FF2EF0;   /* magenta */
+  --warn:#FFCC00;
 }
 
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
+  background: radial-gradient(900px 520px at 10% -10%, rgba(0,245,255,.12), transparent 60%),
+              radial-gradient(900px 520px at 100% 10%, rgba(255,46,240,.10), transparent 55%),
+              radial-gradient(900px 520px at 60% 120%, rgba(182,255,0,.08), transparent 55%),
+              var(--bg2);
+  color:var(--text);
+}
+
+a{ color:inherit; }
+
 header{
+  position:sticky;
+  top:0;
+  z-index:10;
   display:flex;
   align-items:center;
-  padding:10px 15px;
-  background:#111827;
+  gap:12px;
+  padding:12px 14px;
+  background: rgba(17,24,39,.75);
+  backdrop-filter: blur(10px);
+  border-bottom:1px solid rgba(255,255,255,.06);
 }
 
 .menu-btn{
-  font-size:22px;
-  background:none;
-  border:none;
-  color:white;
-  margin-right:15px;
+  width:40px; height:40px;
+  display:grid; place-items:center;
+  font-size:18px;
+  background: rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;
+  color:var(--text);
   cursor:pointer;
+}
+.menu-btn:hover{
+  border-color: rgba(0,245,255,.35);
+  box-shadow: 0 0 0 3px rgba(0,245,255,.10);
 }
 
 .brand{
-  font-weight:bold;
-  font-size:18px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight:900;
+  letter-spacing:.02em;
+}
+.brand img{
+  width:28px; height:28px;
+  border-radius:10px;
+  display:block;
 }
 
 .side{
   position:fixed;
-  top:0;
-  left:-240px;
-  width:200px;
+  top:0; left:-260px;
+  width:240px;
   height:100%;
-  background:#111827;
-  padding-top:60px;
-  transition:.3s;
+  padding-top:64px;
+  background: rgba(17,24,39,.92);
+  backdrop-filter: blur(10px);
+  border-right:1px solid rgba(255,255,255,.06);
+  transition:.25s;
 }
+.side.open{ left:0; }
 
 .side a{
   display:block;
-  padding:12px 20px;
-  color:white;
+  padding:12px 16px;
   text-decoration:none;
+  color:var(--text);
+  opacity:.92;
 }
-
 .side a:hover{
-  background:#1f2937;
-}
-
-.side.open{
-  left:0;
+  background: rgba(255,255,255,.04);
 }
 
 main{
-  padding:20px;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 18px 14px 60px;
+}
+
+h1{
+  margin: 0 0 10px;
+  font-size: 22px;
+  letter-spacing:.02em;
+}
+h2{
+  margin: 0 0 10px;
+  font-size: 15px;
+  letter-spacing:.02em;
+}
+
+.p{
+  line-height:1.9;
+  max-width:72ch;
+  color: var(--muted);
+  margin: 0 0 12px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:14px;
+}
+@media(min-width: 920px){
+  .grid{ grid-template-columns: 1fr 1fr; }
+}
+
+.card{
+  padding:14px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;
+  background: rgba(11,18,32,.75);
+  box-shadow: 0 18px 60px rgba(0,0,0,.35);
+}
+
+label{
+  display:block;
+  font-size: 12px;
+  color: var(--muted);
+}
+input{
+  width:100%;
+  margin-top:6px;
+  padding: 11px 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.08);
+  background: rgba(15,23,42,.75);
+  color: var(--text);
+  outline:none;
+}
+input:focus{
+  border-color: rgba(0,245,255,.45);
+  box-shadow: 0 0 0 3px rgba(0,245,255,.12);
+}
+
+.row2{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:10px;
+}
+
+.btn-primary{
+  padding:11px 14px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:900;
+  border:0;
+  color:#05060A;
+  background: linear-gradient(135deg,var(--c1),var(--c2));
+}
+.btn-primary:active{ transform: translateY(1px); }
+
+.btn-chip{
+  padding:8px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.02);
+  color: var(--text);
+  cursor:pointer;
+}
+.btn-chip:hover{
+  border-color: rgba(255,46,240,.35);
+  box-shadow: 0 0 0 3px rgba(255,46,240,.10);
+}
+
+.kpi{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:10px;
+}
+.kpiBox{
+  padding:10px;
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:12px;
+  background: rgba(255,255,255,.02);
+}
+.kpiBox .t{ font-size:12px; color: var(--muted); }
+.kpiBox .v{ font-weight:1000; font-size:18px; margin-top:4px; }
+
+.hr{
+  border:0;
+  border-top:1px solid rgba(255,255,255,.08);
+  margin:12px 0;
+}
+
+.good{ color: var(--c2); font-weight:1000; }
+.bad{ color: var(--c3); font-weight:1000; }
+.warn{ color: var(--warn); font-weight:1000; }
+
+.table{
+  width:100%;
+  border-collapse: collapse;
+}
+.table th, .table td{
+  padding:8px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  text-align:left;
+}
+.table th{ color: var(--muted); font-weight:800; }
+
+.small{
+  font-size:12px;
+  color: var(--muted);
+  line-height:1.8;
 }
 </style>
 </head>
@@ -84,7 +252,10 @@ main{
 
 <header>
   <button class="menu-btn" onclick="toggleMenu()">☰</button>
-  <div class="brand">D-Ledger</div>
+  <div class="brand">
+    <img src="./logo.png" alt="D-Ledger">
+    <div>D-Ledger</div>
+  </div>
 </header>
 
 <nav id="menu" class="side">
@@ -391,11 +562,11 @@ else{
         </div>
 
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
-          <button style="padding:8px 10px; border-radius:999px; border:1px solid #334155; background:transparent; color:white; cursor:pointer;" onclick="setFuelPreset(28)">プリウス</button>
-          <button style="padding:8px 10px; border-radius:999px; border:1px solid #334155; background:transparent; color:white; cursor:pointer;" onclick="setFuelPreset(30)">アクア</button>
-          <button style="padding:8px 10px; border-radius:999px; border:1px solid #334155; background:transparent; color:white; cursor:pointer;" onclick="setFuelPreset(22)">フィット</button>
-          <button style="padding:8px 10px; border-radius:999px; border:1px solid #334155; background:transparent; color:white; cursor:pointer;" onclick="setFuelPreset(14)">ハリアー</button>
-          <button style="padding:8px 10px; border-radius:999px; border:1px solid #334155; background:transparent; color:white; cursor:pointer;" onclick="setFuelPreset(13)">CX-5</button>
+          <button class="btn-chip" onclick="setFuelPreset(28)">プリウス</button>
+          <button class="btn-chip" onclick="setFuelPreset(28)">アクア</button>
+          <button class="btn-chip" onclick="setFuelPreset(28)">フィット</button>
+          <button class="btn-chip" onclick="setFuelPreset(28)">ハリアー</button>
+          <button class="btn-chip" onclick="setFuelPreset(28)">CX-5</button>
         </div>
       </div>
 
@@ -454,9 +625,7 @@ else{
       </div>
 
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button onclick="calcAll()" style="padding:11px 14px; border-radius:12px; cursor:pointer; font-weight:800; color:#05060A; border:0; background:linear-gradient(135deg,#00F5FF,#B6FF00);">
-          計算する
-        </button>
+       <button onclick="calcAll()" class="btn-primary">計算する</button>
       </div>
 
       <div style="opacity:.75; font-size:12px; line-height:1.9; max-width:72ch;">
