@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D-Ledger</title>
+
+<style>
+body{
+  margin:0;
+  font-family:sans-serif;
+  background:#0f172a;
+  color:white;
+}
+
+header{
+  display:flex;
+  align-items:center;
+  padding:10px 15px;
+  background:#111827;
+}
+
+.menu-btn{
+  font-size:22px;
+  background:none;
+  border:none;
+  color:white;
+  margin-right:15px;
+  cursor:pointer;
+}
+
+.brand{
+  font-weight:bold;
+  font-size:18px;
+}
+
+.side{
+  position:fixed;
+  top:0;
+  left:-240px;
+  width:200px;
+  height:100%;
+  background:#111827;
+  padding-top:60px;
+  transition:.3s;
+}
+
+.side a{
+  display:block;
+  padding:12px 20px;
+  color:white;
+  text-decoration:none;
+}
+
+.side a:hover{
+  background:#1f2937;
+}
+
+.side.open{
+  left:0;
+}
+
+main{
+  padding:20px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <button class="menu-btn" onclick="toggleMenu()">☰</button>
+  <div class="brand">D-Ledger</div>
+</header>
+
+<nav id="menu" class="side">
+  <a href="#" onclick="loadPage('home')">計算</a>
+  <a href="#" onclick="loadPage('about')">About</a>
+  <a href="#" onclick="loadPage('logic')">計算の根拠</a>
+  <a href="#" onclick="loadPage('electric')">電気料金比較</a>
+  <a href="#" onclick="loadPage('blog')">ブログ</a>
+</nav>
+
+<main id="content">
+  <h1>計算ページ</h1>
+  <p>ここに計算機能を入れます。</p>
+</main>
+
+<script>
+function toggleMenu(){
+  document.getElementById("menu").classList.toggle("open");
+}
+
+function loadPage(page){
+  const content = document.getElementById("content");
+
+  //aboutページ
+ if(page === "about"){
+  content.innerHTML = `
+    <h1>About</h1>
+    <p style="line-height:1.9; max-width: 72ch;">
+      D-Ledgerは、EV（テスラなど）とガソリン車の「走行コスト」を同じ条件で比較するための計算ツールです。
+      仕組みは単純で、どちらも「距離 → 消費量 → 単価 → 費用」という流れで求めます。
+      EVは走行距離と電費（Wh/km）から消費電力量（kWh）を計算し、そこに電気単価（円/kWh）を掛けて電気代を出します。
+      ガソリン車は走行距離と燃費（km/L）から消費燃料（L）を計算し、そこにガソリン単価（円/L）を掛けて燃料代を出します。
+      つまり、入力値さえ揃えれば、車種が違っても同じルールで比較できます。
+      <br><br>
+      この結果が本当に正しいとは限りません。
+      燃費・電費は運転の仕方、気温、タイヤ、渋滞、速度域で変わりますし、
+      電気単価も地域・契約プラン（時間帯別や深夜電力）で変わります。
+      そのため、結果の精度は“どれだけ自分の実態に近い入力ができたか”で決まります。
+      <br><br>
+      また、ガソリン単価や電気単価は、どこから引用したか（出典）と更新日を残せる形にして、
+      「いつの情報で計算したのか」を後から追えるようにします。
+    </p>
+  `;
+}
+//計算の根拠
+else if(page === "logic"){
+  content.innerHTML = `
+    <h1>計算の根拠</h1>
+
+    <h2 style="margin-top:18px;">1) EV（電気代）の計算</h2>
+    <p style="line-height:1.9; max-width:72ch;">
+      EVは、走行距離と電費（Wh/km）から「消費電力量（kWh）」を求めます。<br>
+      <b>消費電力量（kWh）＝ 走行距離（km）× 電費（Wh/km）÷ 1000</b><br>
+      そのkWhに電気単価（円/kWh）を掛けて電気代を出します。<br>
+      <b>電気代（円）＝ 消費電力量（kWh）× 電気単価（円/kWh）</b>
+    </p>
+
+    <h2 style="margin-top:18px;">2) ガソリン車（燃料代）の計算</h2>
+    <p style="line-height:1.9; max-width:72ch;">
+      ガソリン車は、走行距離と燃費（km/L）から「消費燃料（L）」を求めます。<br>
+      <b>消費燃料（L）＝ 走行距離（km）÷ 燃費（km/L）</b><br>
+      そのLにガソリン単価（円/L）を掛けて燃料代を出します。<br>
+      <b>燃料代（円）＝ 消費燃料（L）× ガソリン単価（円/L）</b>
+    </p>
+
+    <h2 style="margin-top:18px;">3) 差額の考え方</h2>
+    <p style="line-height:1.9; max-width:72ch;">
+      D-Ledgerでは、<b>差額＝ガソリン代 − EV電気代</b> として計算します。<br>
+      差額がプラスなら「EVのほうが安い」、マイナスなら「ガソリン車のほうが安い」です。
+    </p>
+
+    <h2 style="margin-top:18px;">4) 単価の出典（信頼性のためのメモ欄）</h2>
+    <p style="line-height:1.9; max-width:72ch;">
+      ここはあなたが「どこから単価を引用したか」を残すための欄です。<br>
+      例：ガソリンは公的な価格調査、電気は契約中の電力会社の料金表・検針票など。
+      将来的に値を更新したときも、いつのデータかが追えます。
+    </p>
+
+    <div style="margin-top:12px; padding:12px; border:1px solid #334155; border-radius:12px; background:#0b1220; max-width:72ch;">
+      <div><b>ガソリン単価（円/L）</b></div>
+      <div style="margin-top:6px;">出典：<span style="opacity:.8;">（例）全国平均（価格調査）</span></div>
+      <div>更新日：<span style="opacity:.8;">YYYY-MM-DD</span></div>
+    </div>
+
+    <div style="margin-top:12px; padding:12px; border:1px solid #334155; border-radius:12px; background:#0b1220; max-width:72ch;">
+      <div><b>電気単価（円/kWh）</b></div>
+      <div style="margin-top:6px;">出典：<span style="opacity:.8;">（例）契約プランの料金表／検針票</span></div>
+      <div>更新日：<span style="opacity:.8;">YYYY-MM-DD</span></div>
+      <div style="margin-top:6px; opacity:.85;">※深夜電力など時間帯別の場合は、実際の充電時間に近い単価を使うのが正確です。</div>
+    </div>
+  `;
+}
+//電気料金比較ページ
+else if(page === "electric"){
+
+  const rows = [
+    { pref:"北海道", utility:"北海道電力", day:32, night:24, note:"夜間が安いプランがある場合、充電を夜に寄せると効く。" },
+    { pref:"東京都", utility:"東京電力",   day:34, night:26, note:"時間帯別プランは条件を確認。契約アンペア等でも変わる。" },
+    { pref:"愛知県", utility:"中部電力",   day:33, night:25, note:"夜間帯を使うなら時間帯別。太陽光・蓄電池との相性も良い。" },
+    { pref:"大阪府", utility:"関西電力",   day:33, night:25, note:"EV向け/夜間向けのメニューがある場合は月の充電量で損得が変わる。" }
+  ];
+
+  content.innerHTML = `
+    <h1>電気料金比較（都道府県別）</h1>
+    <p style="line-height:1.9; max-width:72ch;">
+      この表は「入力のたたき台」です。電気料金は契約プラン・時間帯・基本料金などで変わります。
+      最終的には、あなたの電力会社の料金表や検針票（アプリ）を見て、ここを自分用に書き換えてください。
+    </p>
+
+    <div style="margin-top:12px; max-width:72ch;">
+      <input id="prefFilter" placeholder="都道府県で検索（例：愛知、東京）"
+        style="width:100%; padding:12px; border-radius:12px; border:1px solid #334155; background:#0b1220; color:white;">
+    </div>
+
+    <div id="tblWrap" style="overflow:auto; margin-top:12px;"></div>
+
+    <h2 style="margin-top:18px;">深夜電力（時間帯別プラン）の考え方</h2>
+    <p style="line-height:1.9; max-width:72ch;">
+      夜間単価が下がるプランは「充電を夜に寄せられる人」に向いています。
+      ただし昼単価が上がる・基本料金が変わる場合もあるので、月の使用量によって損得が変わります。
+      D-Ledgerの計算を正確にするには、実際の生活に近い単価（あなたの契約プラン）を入力するのが一番です。
+    </p>
+  `;
+
+  const tblWrap = document.getElementById("tblWrap");
+  const filter = document.getElementById("prefFilter");
+
+  function renderTable(list){
+    tblWrap.innerHTML = `
+      <table style="width:100%; border-collapse:collapse; margin-top:6px;">
+        <thead>
+          <tr style="text-align:left; opacity:.85;">
+            <th style="padding:8px; border-bottom:1px solid #334155;">都道府県</th>
+            <th style="padding:8px; border-bottom:1px solid #334155;">電力会社（目安）</th>
+            <th style="padding:8px; border-bottom:1px solid #334155;">昼（円/kWh）</th>
+            <th style="padding:8px; border-bottom:1px solid #334155;">夜（円/kWh）</th>
+            <th style="padding:8px; border-bottom:1px solid #334155;">メモ</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${list.map(r => `
+            <tr>
+              <td style="padding:8px; border-bottom:1px solid #1f2937;">${r.pref}</td>
+              <td style="padding:8px; border-bottom:1px solid #1f2937;">${r.utility}</td>
+              <td style="padding:8px; border-bottom:1px solid #1f2937;">${r.day}</td>
+              <td style="padding:8px; border-bottom:1px solid #1f2937;">${r.night}</td>
+              <td style="padding:8px; border-bottom:1px solid #1f2937; opacity:.85;">${r.note}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+  }
+
+  renderTable(rows);
+
+  filter.addEventListener("input", () => {
+    const key = filter.value.trim();
+    const filtered = key
+      ? rows.filter(r => r.pref.includes(key) || r.utility.includes(key))
+      : rows;
+    renderTable(filtered);
+  });
+}
+//blog
+else if(page === "blog"){
+
+  // ★ここに記事を増やす（コピペして配列に足すだけ）
+  const posts = [
+    {
+      title: "D-Ledgerを作った理由：数字の根拠が追える比較がしたかった",
+      date: "2026-02-23",
+      tags: ["開発", "EV", "コスト比較"],
+      body: `D-Ledgerは「なんとなく安い」ではなく、なぜその金額になるのかが追える形にしたくて作りました。
+燃費や単価は人によって全然違うので、入力値と出典をセットで残せるようにしています。`
+    },
+    {
+      title: "（サンプル）自宅充電を安くする考え方",
+      date: "2026-02-23",
+      tags: ["電気料金", "深夜電力"],
+      body: `夜間単価が安いプランなら、充電時間を夜に寄せるだけで体感のコストが下がります。
+ただし昼単価や基本料金の変化がある場合もあるので、月の使用量で最終判断するのが安全です。`
+    }
+  ];
+
+  content.innerHTML = `
+    <h1>ブログ</h1>
+    <p style="line-height:1.9; max-width:72ch;">
+      ここは記事を増やしていけるページです。右の「記事を追加する方法」を見ながら、
+      posts配列に記事をコピペで足していくだけでOKです。
+    </p>
+
+    <div style="display:grid; grid-template-columns:1fr; gap:14px; margin-top:12px;">
+      <div style="padding:12px; border:1px solid #334155; border-radius:12px; background:#0b1220;">
+        <h2 style="margin:0 0 8px;">記事一覧</h2>
+        <div id="postList"></div>
+      </div>
+
+      <div style="padding:12px; border:1px solid #334155; border-radius:12px; background:#0b1220;">
+        <h2 style="margin:0 0 8px;">本文</h2>
+        <div id="postMeta" style="opacity:.8;"></div>
+        <div id="postBody" style="white-space:pre-wrap; line-height:1.9; margin-top:10px;"></div>
+        <hr style="border:0; border-top:1px solid #334155; margin:12px 0;">
+        <div style="opacity:.8; line-height:1.9;">
+          <b>記事を追加する方法：</b><br>
+          1) index.html の blog部分の <b>posts配列</b> に、記事ブロックをコピペで追加<br>
+          2) title / date / tags / body を書き換える<br>
+          3) 保存して更新すると一覧に出ます
+        </div>
+      </div>
+    </div>
+  `;
+
+  const postList = document.getElementById("postList");
+  const postMeta = document.getElementById("postMeta");
+  const postBody = document.getElementById("postBody");
+
+  function openPost(i){
+    const p = posts[i];
+    postMeta.textContent = `${p.date} / ${p.tags.join(" / ")}`;
+    postBody.textContent = p.body;
+    document.querySelectorAll("[data-post]").forEach(btn=>{
+      btn.style.borderColor = "#334155";
+      btn.style.boxShadow = "none";
+    });
+    const active = document.querySelector(`[data-post="${i}"]`);
+    if(active){
+      active.style.borderColor = "#22d3ee";
+      active.style.boxShadow = "0 0 0 3px rgba(34,211,238,.15)";
+    }
+  }
+
+  postList.innerHTML = posts.map((p, i) => `
+    <button data-post="${i}" style="
+      width:100%;
+      text-align:left;
+      margin-top:8px;
+      padding:10px 10px;
+      border-radius:10px;
+      border:1px solid #334155;
+      background:transparent;
+      color:white;
+      cursor:pointer;"
+      onclick="openPost(${i})">
+      <div style="font-weight:700;">${p.title}</div>
+      <div style="opacity:.7; font-size:12px; margin-top:4px;">${p.date}</div>
+    </button>
+  `).join("");
+
+  // 最初の記事を開く
+  window.openPost = openPost;
+  openPost(0);
+}
+else{
+  content.innerHTML = `
+    <h1>計算</h1>
+    <p style="line-height:1.9; max-width:72ch;">
+      走行距離・電費・単価・燃費を入力して、EVの電気代とガソリン代を比較します。
+      単価の出典や更新日は「計算の根拠」ページに記録できます。
+    </p>
+
+    <div style="display:grid; grid-template-columns:1fr; gap:14px; margin-top:12px;">
+
+      <div style="padding:12px; border:1px solid #334155; border-radius:12px; background:#0b1220;">
+        <h2 style="margin:0 0 8px;">EV（電気代）</h2>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <label>走行距離（km）
+            <input id="km" type="number" value="500">
+          </label>
+          <label>電費（Wh/km）
+            <input id="whkm" type="number" value="155">
+          </label>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <label>自宅単価（円/kWh）
+            <input id="homeYen" type="number" value="28">
+          </label>
+          <label>外部/急速単価（円/kWh）
+            <input id="fastYen" type="number" value="60">
+          </label>
+        </div>
+
+        <label>自宅充電の割合（%）
+          <input id="homeRate" type="number" value="100">
+        </label>
+
+        <label>年間走行距離（km/年）
+          <input id="annualKm" type="number" value="12000">
+        </label>
+      </div>
+
+      <div style="padding:12px; border:1px solid #334155; border-radius:12px; background:#0b1220;">
+        <h2 style="margin:0 0 8px;">ガソリン車（燃料代）</h2>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <label>燃費（km/L）
+            <input id="kmPerL" type="number" value="15">
+          </label>
+          <label>ガソリン単価（円/L）
+            <input id="yenPerL" type="number" value="170">
+          </label>
+        </div>
+
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+          <button style="padding:8px 10px; border-radius:999px; border:1px solid #334155; background:transparent; color:white; cursor:pointer;" onclick="setFuelPreset(28)">プリウス</button>
+          <button style="padding:8px 10px; border-radius:999px; border:1px solid #334155; background:transparent; color:white; cursor:pointer;" onclick="setFuelPreset(30)">アクア</button>
+          <button style="padding:8px 10px; border-radius:999px; border:1px solid #334155; background:transparent; color:white; cursor:pointer;" onclick="setFuelPreset(22)">フィット</button>
+          <button style="padding:8px 10px; border-radius:999px; border:1px solid #334155; background:transparent; color:white; cursor:pointer;" onclick="setFuelPreset(14)">ハリアー</button>
+          <button style="padding:8px 10px; border-radius:999px; border:1px solid #334155; background:transparent; color:white; cursor:pointer;" onclick="setFuelPreset(13)">CX-5</button>
+        </div>
+      </div>
+
+      <div style="padding:12px; border:1px solid #334155; border-radius:12px; background:#0b1220;">
+        <h2 style="margin:0 0 8px;">結果</h2>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div style="padding:10px; border:1px solid #1f2937; border-radius:12px;">
+            <div style="opacity:.8; font-size:12px;">今回の差額</div>
+            <div id="kpiTrip" style="font-weight:800; font-size:18px; margin-top:4px;">—</div>
+          </div>
+          <div style="padding:10px; border:1px solid #1f2937; border-radius:12px;">
+            <div style="opacity:.8; font-size:12px;">年間の差額</div>
+            <div id="kpiYear" style="font-weight:800; font-size:18px; margin-top:4px;">—</div>
+          </div>
+        </div>
+
+        <div id="detail" style="margin-top:12px; line-height:1.9; opacity:.92;"></div>
+      </div>
+
+      <div style="padding:12px; border:1px solid #334155; border-radius:12px; background:#0b1220;">
+        <h2 style="margin:0 0 8px;">未来予測</h2>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <label>ガソリン価格の変化（%/年）
+            <input id="gasGrow" type="number" value="0">
+          </label>
+          <label>電気単価の変化（%/年）
+            <input id="elecGrow" type="number" value="0">
+          </label>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <label>車両価格差（円）※任意
+            <input id="priceGap" type="number" value="0">
+          </label>
+          <label>比較年数（カンマ区切り）
+            <input id="yearsList" type="text" value="3,5,10">
+          </label>
+        </div>
+
+        <div id="futureTable" style="overflow:auto; margin-top:10px;"></div>
+
+        <div id="payback" style="margin-top:12px; padding:12px; border:1px solid #1f2937; border-radius:12px;">
+          <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+            <div style="font-weight:800;">回収率（バー）</div>
+            <div id="paybackMeta" style="opacity:.75;">—</div>
+          </div>
+          <div style="margin-top:10px; height:12px; border-radius:999px; border:1px solid #334155; background:#0f172a; overflow:hidden; position:relative;">
+            <div id="barFill" style="height:100%; width:0%; background:linear-gradient(90deg,#00F5FF,#B6FF00);"></div>
+            <div id="barMark" style="position:absolute; top:-6px; width:2px; height:24px; background:#FF2EF0; left:100%; transform:translateX(-1px);"></div>
+          </div>
+          <div id="paybackText" style="margin-top:8px; opacity:.85; line-height:1.8;">—</div>
+        </div>
+
+      </div>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button onclick="calcAll()" style="padding:11px 14px; border-radius:12px; cursor:pointer; font-weight:800; color:#05060A; border:0; background:linear-gradient(135deg,#00F5FF,#B6FF00);">
+          計算する
+        </button>
+      </div>
+
+      <div style="opacity:.75; font-size:12px; line-height:1.9; max-width:72ch;">
+        免責：本ツールは参考情報です。燃費・電費・単価・充電比率は環境や契約条件で変わります。
+      </div>
+    </div>
+  `;
+
+  // ----- ローカル関数（このページだけで完結） -----
+  const $ = (id) => document.getElementById(id);
+  const yen = (x) => Math.round(x).toLocaleString("ja-JP") + " 円";
+  const num = (id) => Number($(id).value);
+  const clamp = (x,a,b)=>Math.min(b, Math.max(a,x));
+
+  window.setFuelPreset = function(kmPerL){
+    $("kmPerL").value = kmPerL;
+    calcAll();
+  }
+
+  function parseYearsList(s){
+    return String(s||"")
+      .split(",")
+      .map(x=>Number(x.trim()))
+      .filter(n=>Number.isFinite(n) && n>0)
+      .slice(0,10);
+  }
+
+  function sumNYears(base, grow, n){
+    let s=0;
+    for(let i=0;i<n;i++) s += base * Math.pow(1+grow, i);
+    return s;
+  }
+
+  function computePayback({annualEvYear1, annualGasYear1, elecGrow, gasGrow, priceGap, horizonYears}){
+    if(priceGap === 0){
+      return {paybackYear:1, recoveryPct:100, netAtH:0};
+    }
+    let netAtH = -priceGap;
+    for(let y=1;y<=horizonYears;y++){
+      const ev = annualEvYear1 * Math.pow(1+elecGrow, y-1);
+      const gas = annualGasYear1 * Math.pow(1+gasGrow, y-1);
+      netAtH += (gas - ev);
+    }
+    const savingsAtH = netAtH + priceGap;
+    const recoveryPct = (savingsAtH / priceGap) * 100;
+
+    let cum = -priceGap;
+    let paybackYear = null;
+    for(let y=1;y<=30;y++){
+      const ev = annualEvYear1 * Math.pow(1+elecGrow, y-1);
+      const gas = annualGasYear1 * Math.pow(1+gasGrow, y-1);
+      cum += (gas - ev);
+      if(cum >= 0){ paybackYear = y; break; }
+    }
+    return {paybackYear, recoveryPct, netAtH};
+  }
+
+  window.calcAll = function(){
+    const km = num("km");
+    const whkm = num("whkm");
+    const homeYen = num("homeYen");
+    const fastYen = num("fastYen");
+    const homeRate = num("homeRate");
+    const annualKm = num("annualKm");
+    const kmPerL = num("kmPerL");
+    const yenPerL = num("yenPerL");
+
+    const gasGrow = Number($("gasGrow").value || 0)/100;
+    const elecGrow = Number($("elecGrow").value || 0)/100;
+    const priceGap = Number($("priceGap").value || 0);
+
+    if([km,whkm,homeYen,fastYen,annualKm,kmPerL,yenPerL].some(v=>!isFinite(v)||v<=0) || !isFinite(homeRate) || homeRate<0 || homeRate>100){
+      $("detail").innerHTML = `<span style="color:#FFCC00; font-weight:800;">入力値を確認してください。</span>`;
+      $("kpiTrip").textContent = "—";
+      $("kpiYear").textContent = "—";
+      $("futureTable").innerHTML = "";
+      $("paybackMeta").textContent = "—";
+      $("paybackText").textContent = "—";
+      $("barFill").style.width = "0%";
+      $("barMark").style.left = "100%";
+      return;
+    }
+
+    const home = homeRate/100;
+    const blended = homeYen*home + fastYen*(1-home);
+
+    // Trip costs
+    const kwh = (km*whkm)/1000;
+    const evCost = kwh*blended;
+
+    const liters = km/kmPerL;
+    const gasCost = liters*yenPerL;
+
+    const diff = gasCost - evCost;
+    const evBetter = diff >= 0;
+
+    // Year costs
+    const annualKwh = (annualKm*whkm)/1000;
+    const annualEv = annualKwh*blended;
+    const annualGas = (annualKm/kmPerL)*yenPerL;
+    const annualDiff = annualGas - annualEv;
+
+    $("kpiTrip").textContent = yen(Math.abs(diff));
+    $("kpiYear").textContent = yen(Math.abs(annualDiff));
+
+    $("detail").innerHTML = `
+      <div style="font-weight:900; font-size:18px; color:${evBetter ? "#B6FF00" : "#FF2EF0"};">
+        ${evBetter ? "EVの方が安い" : "ガソリン車の方が安い"}
+      </div>
+      <div style="opacity:.85; margin-top:6px;">
+        EV：${yen(evCost)}（消費 ${kwh.toFixed(2)} kWh / 平均単価 ${blended.toFixed(1)} 円/kWh）<br>
+        ガソリン：${yen(gasCost)}（消費 ${liters.toFixed(2)} L）<br>
+        差額：<b>${yen(Math.abs(diff))}</b>（${evBetter ? "EVが得" : "ガソリンが得"}）
+      </div>
+      <div style="opacity:.85; margin-top:8px;">
+        年間：EV ${yen(annualEv)} / ガソリン ${yen(annualGas)}<br>
+        年間差額：<b>${yen(Math.abs(annualDiff))}</b>（${annualDiff>=0 ? "EVが得" : "ガソリンが得"}）
+      </div>
+    `;
+
+    // Future table
+    const yearsList = parseYearsList($("yearsList").value || "3,5,10");
+    const annualEvYear1 = annualEv;
+    const annualGasYear1 = annualGas;
+
+    const rows = yearsList.map(n=>{
+      const evSum = sumNYears(annualEvYear1, elecGrow, n);
+      const gasSum = sumNYears(annualGasYear1, gasGrow, n);
+      const net = gasSum - evSum - priceGap;
+      return {n, evSum, gasSum, net};
+    });
+
+    $("futureTable").innerHTML = `
+      <table style="width:100%; border-collapse:collapse; margin-top:6px;">
+        <thead>
+          <tr style="text-align:left; opacity:.85;">
+            <th style="padding:8px; border-bottom:1px solid #334155;">年数</th>
+            <th style="padding:8px; border-bottom:1px solid #334155;">ガソリン累計</th>
+            <th style="padding:8px; border-bottom:1px solid #334155;">EV累計</th>
+            <th style="padding:8px; border-bottom:1px solid #334155;">累計差額</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(r=>{
+            const win = r.net >= 0;
+            return `
+              <tr>
+                <td style="padding:8px; border-bottom:1px solid #1f2937;">${r.n}年</td>
+                <td style="padding:8px; border-bottom:1px solid #1f2937;">${yen(r.gasSum)}</td>
+                <td style="padding:8px; border-bottom:1px solid #1f2937;">${yen(r.evSum)}</td>
+                <td style="padding:8px; border-bottom:1px solid #1f2937; font-weight:900; color:${win ? "#B6FF00" : "#FF2EF0"};">
+                  ${yen(Math.abs(r.net))}（${win ? "EVが得" : "ガソリンが得"}）
+                </td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table>
+    `;
+
+    // Payback / Recovery bar (use max years in list)
+    const horizon = Math.max(...yearsList);
+    const pb = computePayback({annualEvYear1, annualGasYear1, elecGrow, gasGrow, priceGap, horizonYears:horizon});
+
+    const pct = isFinite(pb.recoveryPct) ? pb.recoveryPct : 0;
+    const pctBar = clamp(pct, 0, 100);
+
+    $("barFill").style.width = pctBar.toFixed(1) + "%";
+
+    // mark: payback year position in horizon
+    let markLeft = 100;
+    if(pb.paybackYear && pb.paybackYear <= horizon){
+      markLeft = clamp((pb.paybackYear / horizon) * 100, 0, 100);
+    }
+    $("barMark").style.left = markLeft.toFixed(1) + "%";
+
+    $("paybackMeta").textContent = `比較：${horizon}年 / 価格差：${yen(priceGap)}`;
+    const paybackText = pb.paybackYear ? `回収年：${pb.paybackYear}年目` : "回収年：30年以内は未到達";
+    const netLabel = pb.netAtH >= 0
+      ? `${yen(Math.abs(pb.netAtH))}（${horizon}年でEVが得）`
+      : `${yen(Math.abs(pb.netAtH))}（${horizon}年でガソリンが得）`;
+
+    $("paybackText").innerHTML = `
+      <div>回収率：<b>${Math.round(pct)}%</b></div>
+      <div>${paybackText}</div>
+      <div>純差額：<b>${netLabel}</b></div>
+    `;
+  }
+
+  // 初期計算
+  calcAll();
+}
+
+  document.getElementById("menu").classList.remove("open");
+}
+</script>
+
+</body>
+</html>
