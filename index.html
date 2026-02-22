@@ -275,17 +275,66 @@ header{
   max-width: 80%;
 }
 
+/* ===== Header override (center logo) ===== */
+.topbar{
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: 72px;
+  display: grid;
+  grid-template-columns: 56px 1fr 56px;
+  align-items: center;
+  padding: 0 12px;
+  background: rgba(17,24,39,.75);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+
+.menu-btn{
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  color: #e5e7eb;
+  cursor: pointer;
+}
+
+.topbar-center{
+  display: grid;
+  place-items: center;
+}
+
+.topbar-logo{
+  height: 44px;      /* ←ここで大きさ調整 */
+  width: auto;
+  max-width: min(520px, 88vw);
+  display: block;
+}
+
+.topbar-right{
+  width: 40px;
+  height: 40px;
+}
+
+
 </style>
 
 
 <body>
 
-<header>
-  <button class="menu-btn" onclick="toggleMenu()">☰</button>
+<header class="topbar">
+  <button class="menu-btn" onclick="toggleMenu()" aria-label="メニュー">☰</button>
 
-  <div class="header-center">
-    <img src="./logolong_transparent.png" alt="D-Ledger" class="main-logo">
+  <!-- 中央ロゴ（合体PNG） -->
+  <div class="topbar-center">
+    <img src="./logo.png" alt="D-Ledger" class="topbar-logo">
   </div>
+
+  <!-- 右側ダミー（中央寄せを安定させる） -->
+  <div class="topbar-right" aria-hidden="true"></div>
 </header>
 
 <nav id="menu" class="side">
